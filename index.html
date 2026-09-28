@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration System</title>
+
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+    <h1>Student Registration</h1>
+    <p>Enter the student's information below.</p>
+
+    <form id="registrationForm">
+
+        <div class="form-group">
+            <label for="studentId">Student ID</label>
+            <input type="text" id="studentId" name="studentId" required placeholder="e.g. STU001"
+    autocomplete="off"  minlength="5" maxlength="10">
+        </div>
+
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name" autocomplete="given-name" minlength="2" maxlength="30">
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name"
+    autocomplete="family-name" minlength="2" maxlength="39">
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input type="date" id="dateOfBirth" name="dateOfBirth" required  autocomplete="bday">
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required placeholder="e.g. 0712345678"
+    autocomplete="tel" minlength="10" maxlength="10" pattern="[0-9]{10}">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required  placeholder="e.g. student@example.com"
+    autocomplete="email">
+        </div>
+
+        <div class="form-group">
+            <label for="course">Course</label>
+            <select id="course" name="course" required>
+                <option value="">Select Course</option>
+                <option value="software-engineering">Software Engineering</option>
+                <option value="computer-science">Computer Science</option>
+                <option value="information-technology">Information Technology</option>
+                <option value="business-information-technology">Business Information Technology</option>
+        </select>
+        </div>
+
+        <div class="form-group">
+            <label for="year">Year of Study</label>
+            <select id="year" name="year" required>
+                <option value="">Select Year</option>
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+                <option value="3">Year 3</option>
+                <option value="4">Year 4</option>
+            </select>
+        </div>
+        <div id="formMessage"></div>
+
+        <button  class="button"  "submit">Register Student</button>
+
+    </form>
+
+</div>
+
+<script src="script.js"></script
+</body>
+</html>

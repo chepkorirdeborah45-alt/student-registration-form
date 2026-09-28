@@ -1,93 +1,229 @@
-const form = document.getElementById("registrationForm");
+const form = document.getElementById("studentForm");
+const message = document.getElementById("formMessage");
+const dob = document.getElementById("dob");
+const submitButton = form.querySelector(
+    'button[type="submit"]'
+);
 
-const formMessage = document.getElementById("formMessage");
+// Set today's date as the maximum date of birth.
+const today = new Date();
+
+const localToday = new Date(
+    today.getTime() - today.getTimezoneOffset() * 60000
+).toISOString().slice(0, 10);
+
+dob.max = localToday;
 
 
-form.addEventListener("submit", function(event) {
+// Display validation error
+function showError(input, text) {
+    const field = input.closest(".field");
 
+    field.classList.add("invalid");
+    field.querySelector(".error").textContent = text;
+
+    input.setAttribute("aria-invalid", "true");
+}
+
+
+// Clear validation error
+function clearError(input) {
+    const field = input.closest(".field");
+
+    field.classList.remove("invalid");
+    field.querySelector(".error").textContent = "";
+
+    input.removeAttribute("aria-invalid");
+}
+
+
+// Validate individual input
+function validate(input) {
+    const value = input.value.trim();
+    let error = "";
+
+    // Required fields
+    if (input.required && !value) {
+        error = "This field is required.";
+    }
+
+    // Student ID validation
+    else if (
+        input.id === "studentId" &&
+        value &&
+        !/^[A-Za-z0-9-]{3,20}$/.test(value)
+    ) {
+        error = "Use 3–20 letters, numbers, or hyphens.";
+    }
+
+    // Name validation
+    else if (
+        ["firstName", "lastName"].includes(input.id) &&
+        value &&
+        !/^[\p{L}][\p{L} .'-]{1,49}$/u.test(value)
+    ) {
+        error = "Enter a valid name.";
+    }
+
+    // Email validation
+    else if (
+        input.type === "email" &&
+        value &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
+    ) {
+        error = "Enter a valid email address.";
+    }
+
+    // Phone validation
+    else if (
+        input.id === "phone" &&
+        value &&
+        !/^\+?[0-9][0-9 ()-]{5,23}[0-9]$/.test(value)
+    ) {
+        error = "Enter a valid phone number.";
+    }
+
+    // Date of birth validation
+    else if (
+        input.id === "dob" &&
+        value &&
+        value > localToday
+    ) {
+        error = "Date of birth cannot be in the future.";
+    }
+
+    // Minimum length validation
+    else if (
+        input.minLength > 0 &&
+        value &&
+        value.length < input.minLength
+    ) {
+        error = `Enter at least ${input.minLength} characters.`;
+    }
+
+    if (error) {
+        showError(input, error);
+        return false;
+    }
+
+    clearError(input);
+    return true;
+}
+
+
+// Get all input fields
+const fields = [
+    ...form.querySelectorAll("input, select")
+];
+
+
+// Validate fields when the user leaves them
+fields.forEach(input => {
+
+    input.addEventListener("blur", () => {
+        validate(input);
+    });
+
+    input.addEventListener("input", () => {
+        if (
+            input.closest(".field").classList.contains("invalid")
+        ) {
+            validate(input);
+        }
+
+        message.hidden = true;
+    });
+
+    input.addEventListener("change", () => {
+        validate(input);
+        message.hidden = true;
+    });
+
+});
+
+
+// Show success or error message
+function showMessage(text, isError = false) {
+    message.textContent = text;
+
+    message.classList.toggle(
+        "error-message",
+        isError
+    );
+
+    message.hidden = false;
+}
+
+
+// Submit the form
+form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    // Validate all fields
+    const isValid = fields
+        .map(input => validate(input))
+        .every(Boolean);
 
-    const studentId = document.getElementById("studentId").value.trim();
+    // Stop if there are validation errors
+    if (!isValid) {
+        const firstInvalid = form.querySelector(
+            '[aria-invalid="true"]'
+        );
 
-    const firstName = document.getElementById("firstName").value.trim();
-
-    const lastName = document.getElementById("lastName").value.trim();
-
-    const gender = document.getElementById("gender").value;
-
-    const dateOfBirth = document.getElementById("dateOfBirth").value;
-
-    const phone = document.getElementById("phone").value.trim();
-
-    const email = document.getElementById("email").value.trim();
-
-    const course = document.getElementById("course").value;
-
-    const year = document.getElementById("year").value;
-
-
-    let errors = [];
-
-
-    if (studentId === "") {
-        errors.push("Student ID is required.");
-    }
-
-    if (firstName === "") {
-        errors.push("First name is required.");
-    }
-
-    if (lastName === "") {
-        errors.push("Last name is required.");
-    }
-
-    if (gender === "") {
-        errors.push("Please select your gender.");
-    }
-
-    if (dateOfBirth === "") {
-        errors.push("Date of birth is required.");
-    }
-
-
-    const phonePattern = /^[0-9]{10}$/;
-
-    if (!phonePattern.test(phone)) {
-        errors.push("Phone number must contain exactly 10 digits.");
-    }
-
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(email)) {
-        errors.push("Please enter a valid email address.");
-    }
-
-
-    if (course === "") {
-        errors.push("Please select a course.");
-    }
-
-    if (year === "") {
-        errors.push("Please select your year of study.");
-    }
-
-
-    if (errors.length > 0) {
-
-        formMessage.innerHTML = errors
-            .map(error => `<p>${error}</p>`)
-            .join("");
-
-        formMessage.className = "error";
-
+        firstInvalid?.focus();
         return;
     }
 
+    // Collect student data
+    const student = Object.fromEntries(
+        new FormData(form).entries()
+    );
 
-    formMessage.textContent = "Student registered successfully!";
+    // Disable button during submission
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
 
-    formMessage.className = "success";
+    try {
+        /*
+          Replace this endpoint with your backend URL
+          when your PHP or Node.js API is ready.
+        */
 
+        const response = await fetch("/api/students", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(student)
+        });
+
+        if (!response.ok) {
+            throw new Error("Registration failed.");
+        }
+
+        const result = await response.json();
+
+        // Show success message
+        showMessage(
+            result.message || "Student registered successfully!"
+        );
+
+        // Clear form after successful registration
+        form.reset();
+
+    } catch (error) {
+        console.error(error);
+
+        showMessage(
+            "Unable to register student. Please try again.",
+            true
+        );
+
+    } finally {
+        // Enable button again
+        submitButton.disabled = false;
+        submitButton.textContent = "Register Student";
+    }
 });
